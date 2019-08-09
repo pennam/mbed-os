@@ -53,6 +53,9 @@ static void output_mode(PinName pin, int mode)
     uint32_t gpio_add = Set_GPIO_Clock(port_index);
     GPIO_TypeDef *gpio = (GPIO_TypeDef *)gpio_add;
 
+#if defined(STM32H7)
+    #define GPIO_OTYPER_OT_0 GPIO_OTYPER_OT0
+#endif
 
     /* Output mode configuration*/
     gpio->OTYPER  &= ~((GPIO_OTYPER_OT_0) << ((uint16_t)pin_index)) ;
@@ -435,6 +438,20 @@ private:
 } // namespace vendor
 } // namespace ble
 
+#if defined(STM32H7)
+
+ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver() {
+    static ble::vendor::cordio::H4TransportDriver transport_driver(
+        /* TX */ PA_15, /* RX */ PF_6, /* cts */ PF_9, /* rts */ PF_8, 115200
+    );
+    static ble::vendor::wise1530::HCIDriver hci_driver(
+        transport_driver, /* host wake */ PJ_13, /* device wake */ PJ_14, /* bt_power */ PJ_12
+    );
+    return hci_driver;
+}
+
+#else
+
 ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver() {
     static ble::vendor::cordio::H4TransportDriver transport_driver(
         /* TX */ PA_2, /* RX */ PA_3, /* cts */ PA_0, /* rts */ PA_1, 115200
@@ -444,3 +461,5 @@ ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver() {
     );
     return hci_driver;
 }
+
+#endif

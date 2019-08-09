@@ -204,6 +204,8 @@ void USBPhyHw::init(USBPhyEvents *events)
     hpcd.Init.speed = PCD_SPEED_HIGH;
     __HAL_RCC_USB_OTG_HS_CLK_ENABLE();
     __HAL_RCC_USB_OTG_HS_ULPI_CLK_ENABLE();
+    __HAL_RCC_USB_OTG_HS_CLK_SLEEP_ENABLE();
+    __HAL_RCC_USB_OTG_HS_ULPI_CLK_SLEEP_ENABLE();
     map = PinMap_USB_HS;
 #elif (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
     hpcd.Instance = USB_OTG_HS;
@@ -237,7 +239,9 @@ void USBPhyHw::init(USBPhyEvents *events)
         map++;
     }
 
+#if !defined(TARGET_STM32H7)
     __HAL_RCC_PWR_CLK_ENABLE();
+#endif
 
 #if !defined(TARGET_STM32WB)
     __HAL_RCC_SYSCFG_CLK_ENABLE();
