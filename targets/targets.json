@@ -2711,14 +2711,8 @@
             "MBED_TICKLESS",
             "EXTRA_IDLE_STACK_REQUIRED"
         ],
-        "overrides": { "lpticker_delay_ticks": 4 },
         "detect_code": ["0813"],
-        "components_add": ["QSPIF"],
-        "extra_labels_add": [
-            "WICED",
-            "CYW43XXX",
-            "CORDIO"
-        ],
+        "components_add": ["QSPIF", "FLASHIAP", "WHD", "4343W", "CYW43XXX"],
         "features": ["LWIP", "BLE"],
         "device_has_add": [
             "ANALOGOUT",
@@ -2728,11 +2722,12 @@
             "CRC",
             "TRNG",
             "FLASH",
-            "QSPI"
+            "QSPI",
+            "EMAC"
         ],
         "overrides": {
             "lpticker_delay_ticks": 0,
-            "network-default-interface-type": "ETHERNET"
+            "network-default-interface-type": "WIFI"
         },
         "release_versions": ["5"],
         "device_name": "STM32H747XIHx",
@@ -2744,20 +2739,17 @@
         "macros_add": [
             "CORE_CM7"
         ],
-        "components_add": ["FLASHIAP"],
         "mbed_rom_start": "0x08000000",
         "mbed_rom_size" : "0x100000",
         "mbed_ram_start": "0x24000000",
         "mbed_ram_size" : "0x80000",
         "device_has_add": [
-            "MPU",
-            "EMAC"
+            "MPU"
         ]
     },
     "PORTENTA_H7_M4": {
         "inherits": ["PORTENTA_H7"],
         "core": "Cortex-M4F",
-        "components_add": ["FLASHIAP"],
         "mbed_rom_start": "0x08100000",
         "mbed_rom_size" : "0x100000",
         "mbed_ram_start": "0x10000000",

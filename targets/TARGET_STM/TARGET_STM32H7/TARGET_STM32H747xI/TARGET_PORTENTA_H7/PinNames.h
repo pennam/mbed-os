@@ -325,6 +325,15 @@ typedef enum {
     PK_14 = 0xAE,
     PK_15 = 0xAF,
 
+    WL_REG_ON = PJ_1,
+    WL_HOST_WAKE = PJ_5,
+    WL_SDIO_0 = PC_8,
+    WL_SDIO_1 = PC_9,
+    WL_SDIO_2 = PC_10,
+    WL_SDIO_3 = PC_11,
+    WL_SDIO_CMD = PD_2,
+    WL_SDIO_CLK = PC_12,
+
     // ADC internal channels
     ADC_TEMP = 0xF0,
     ADC_VREF = 0xF1,
