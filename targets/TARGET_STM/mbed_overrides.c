@@ -129,11 +129,11 @@ void mbed_sdk_init()
         LL_HSEM_1StepLock(HSEM, CFG_HW_STOP_MODE_SEMID);
         /*Release HSEM in order to notify the CPU2(CM4)*/
         LL_HSEM_ReleaseLock(HSEM, CFG_HW_STOP_MODE_SEMID, 0);
+        /* wait until CPU2 wakes up from stop mode */
+        while (LL_RCC_D2CK_IsReady() == 0);
     } else {
-        LL_RCC_ForceCM4Boot();
+        //LL_RCC_ForceCM4Boot();
     }
-    /* wait until CPU2 wakes up from stop mode */
-    while (LL_RCC_D2CK_IsReady() == 0);
 #endif /* CORE_M4 */
 #else /* Single core */
     // Update the SystemCoreClock variable.
