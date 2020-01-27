@@ -10102,12 +10102,17 @@
                 "value": "USE_PLL_HSE_EXTC",
                 "macro_name": "CLOCK_SOURCE"
             },
+            "abp1_clock": {
+                "help": "ABP1 clock to fix I2C speed calculation",
+                "value": "112500000",
+                "macro_name": "APB1CLK"
+            },
             "lpticker_lptim": {
                 "help": "This target supports LPTIM. Set value 1 to use LPTIM for LPTICKER, or 0 to use RTC wakeup timer",
                 "value": 1
             },
             "hse_value": {
-                "help": "HSE default value is 25MHz in HAL",
+                "help": "HSE default value is 27MHz in HAL",
                 "value": "27000000",
                 "macro_name": "HSE_VALUE"
             },
