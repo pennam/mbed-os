@@ -2709,6 +2709,10 @@
             "usb_speed": {
                 "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS",
                 "value": "USE_USB_OTG_HS"
+            },
+            "lse_bypass": {
+                "help": "1 to use an oscillator (not a crystal) on 32k LSE",
+                "value": "1"
             }
         },
         "macros_add": [
