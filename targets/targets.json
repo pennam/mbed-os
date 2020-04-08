@@ -2444,8 +2444,8 @@
                 "value": 1
             },
             "hse_value": {
-                "help": "HSE default value is 25MHz in HAL",
-                "value": "27000000",
+                "help": "HSE default value is 27MHz in HAL",
+                "value": "25000000",
                 "macro_name": "HSE_VALUE"
             },
             "usb_speed": {
