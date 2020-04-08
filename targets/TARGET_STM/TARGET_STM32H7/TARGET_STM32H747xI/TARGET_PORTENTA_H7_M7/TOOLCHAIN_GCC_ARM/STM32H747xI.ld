@@ -39,6 +39,8 @@ MEMORY
  __OPENAMP_region_start__  = ORIGIN(OPEN_AMP_SHMEM);
  __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
 
+_ConfigStart = 0x0801F000;
+
 /* Linker script to place sections and symbol values. Should be used together
  * with other linker script that defines memory regions FLASH and RAM.
  * It references following symbols, which must be defined in code:
@@ -94,6 +96,11 @@ SECTIONS
         *(.rodata*)
 
         KEEP(*(.eh_frame*))
+    } > FLASH
+
+    .ConfigData _ConfigStart :
+    {
+        KEEP(*(.bootloader_version))
     } > FLASH
 
     .ARM.extab :

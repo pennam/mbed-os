@@ -52,9 +52,11 @@
 #include <math.h>
 #include "nvic_addr.h" // MBED PATCH for Bootloader
 
-#if !defined  (HSE_VALUE)
-#define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
+#if defined  (HSE_VALUE)
+#undef HSE_VALUE
 #endif /* HSE_VALUE */
+
+uint32_t HSE_VALUE = ((uint32_t)25000000);
 
 #if !defined  (CSI_VALUE)
   #define CSI_VALUE    ((uint32_t)4000000) /*!< Value of the Internal oscillator in Hz*/
@@ -300,6 +302,13 @@ void SystemCoreClockUpdate (void)
   uint32_t pllp, pllsource, pllm, pllfracen, hsivalue, tmp;
   float_t fracn1, pllvco;
 
+  uint8_t* bootloader_data = (uint8_t*)(0x801F000);
+  if (bootloader_data[0] != 0xA0 || bootloader_data[1] < 14) {
+    HSE_VALUE = 27000000;
+  } else {
+    HSE_VALUE = bootloader_data[10] * 1000000;
+  }
+
   /* Get SYSCLK source -------------------------------------------------------*/
 
   switch (RCC->CFGR & RCC_CFGR_SWS)
@@ -318,6 +327,7 @@ void SystemCoreClockUpdate (void)
     break;
 
   case RCC_CFGR_SWS_PLL1:  /* PLL1 used as system clock  source */
+
 
     /* PLL_VCO = (HSE_VALUE or HSI_VALUE or CSI_VALUE/ PLLM) * PLLN
     SYSCLK = PLL_VCO / PLLR
