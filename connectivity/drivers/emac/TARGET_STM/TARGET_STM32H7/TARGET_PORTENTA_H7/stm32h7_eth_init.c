@@ -96,6 +96,7 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
         HAL_GPIO_Init(GPIOA, &gpio_eth_rst_init_structure);
         HAL_GPIO_WritePin(GPIOA, ETH_CRS_DV_Pin, 1);
 
+        HAL_Delay(25);
         HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, 0);
         HAL_Delay(100);
         HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, 1);
