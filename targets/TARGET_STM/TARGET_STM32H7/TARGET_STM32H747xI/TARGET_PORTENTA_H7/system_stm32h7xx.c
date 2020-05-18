@@ -52,11 +52,9 @@
 #include <math.h>
 #include "nvic_addr.h" // MBED PATCH for Bootloader
 
-#if defined  (HSE_VALUE)
-#undef HSE_VALUE
-#endif /* HSE_VALUE */
+#if !defined  (HSE_VALUE)
 
-uint32_t HSE_VALUE = ((uint32_t)25000000);
+#endif /* HSE_VALUE */
 
 #if !defined  (CSI_VALUE)
   #define CSI_VALUE    ((uint32_t)4000000) /*!< Value of the Internal oscillator in Hz*/
@@ -301,13 +299,6 @@ void SystemCoreClockUpdate (void)
 {
   uint32_t pllp, pllsource, pllm, pllfracen, hsivalue, tmp;
   float_t fracn1, pllvco;
-
-  uint8_t* bootloader_data = (uint8_t*)(0x801F000);
-  if (bootloader_data[0] != 0xA0 || bootloader_data[1] < 14) {
-    HSE_VALUE = 27000000;
-  } else {
-    HSE_VALUE = bootloader_data[10] * 1000000;
-  }
 
   /* Get SYSCLK source -------------------------------------------------------*/
 
