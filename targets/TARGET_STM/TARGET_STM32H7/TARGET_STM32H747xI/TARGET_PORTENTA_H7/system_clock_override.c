@@ -266,3 +266,17 @@ uint8_t SetSysClock_PLL_HSI(void)
     return 1; // OK
 }
 #endif /* ((CLOCK_SOURCE) & USE_PLL_HSI) */
+
+#if defined (CORE_CM4)
+void HSEM2_IRQHandler(void)
+{
+  HAL_HSEM_IRQHandler();
+}
+#endif
+
+#if defined (CORE_CM7)
+void HSEM1_IRQHandler(void)
+{
+  HAL_HSEM_IRQHandler();
+}
+#endif
