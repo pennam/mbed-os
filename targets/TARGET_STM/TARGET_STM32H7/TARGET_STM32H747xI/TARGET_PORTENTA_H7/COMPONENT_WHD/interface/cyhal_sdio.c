@@ -276,7 +276,7 @@ restart:
       loop_count--;
       if ( loop_count == 0 || (( response != NULL) && (( temp_sta & SDIO_ERROR_MASK ) != 0))  )
       {
-        PRINTF("Restart single access loop count %ld  stat %lx\n",loop_count,temp_sta);
+        WPRINT_MACRO( ("Restart single access loop count %ld  stat %lx\n",loop_count,temp_sta) );
         goto restart;
       }
      } while ( ( temp_sta & SDIO_FLAG_CMDACT ) != 0);
@@ -297,10 +297,10 @@ exit:
 
      if (result)
      {
-       PRINTF("SDIO->POWER %lx \n",SDIO->POWER);
-       PRINTF("SDIO->CLKCR %lx \n",SDIO->CLKCR);
-       PRINTF("result %lx \n", result);
-       PRINTF("cyhal_sdio_send_cmd %s\n",(result==0)? "Passed":"Failed");
+       WPRINT_MACRO( ("SDIO->POWER %lx \n",SDIO->POWER) );
+       WPRINT_MACRO( ("SDIO->CLKCR %lx \n",SDIO->CLKCR) );
+       WPRINT_MACRO( ("result %lx \n", result) );
+       WPRINT_MACRO( ("cyhal_sdio_send_cmd %s\n",(result==0)? "Passed":"Failed") );
        while(1);
      }
   //  platform_mcu_powersave_enable();
@@ -524,7 +524,7 @@ restart:
     if (attempts >= (uint16_t) BUS_LEVEL_MAX_RETRIES)
     {
         /* WWD_SDIO_RETRIES_EXCEEDED */
-        PRINTF("Too much attempt\n");
+        WPRINT_MACRO(("Too much attempt\n"));
         result = -1;
         goto exit;
     }
@@ -574,23 +574,23 @@ restart:
 #endif
     if ( result != CY_RSLT_SUCCESS )
     {
-      PRINTF("failed getting semaphore\n");
+      WPRINT_MACRO(("failed getting semaphore\n"));
       goto exit;
     }
     if ( sdio_transfer_failed  )
     {
-      PRINTF("try again sdio_transfer_failed  %x irq %x\n",sdio_transfer_failed,irqstatus);
+      WPRINT_MACRO( ("try again sdio_transfer_failed  %x irq %x\n",sdio_transfer_failed,irqstatus) );
       goto restart;
     }
     /* Check if there were any SDIO errors */
     if ( ( SDIO->STA & ( SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT ) ) != 0 )
     {
-      PRINTF("sdio errors SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT\n");
+      WPRINT_MACRO(("sdio errors SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT\n"));
       goto restart;
     }
     else if ( ( ( SDIO->STA & ( SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVERR ) ) != 0 ) )
     {
-      PRINTF("sdio errors SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVER \n");
+      WPRINT_MACRO(("sdio errors SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVER \n"));
       goto restart;
     }
 
@@ -632,7 +632,7 @@ exit:
 
   //HAL_Delay(30);
   if (0) { //(direction==CYHAL_READ) {
-    PRINTF("%d %s cmd 53 argument %lx datasize %d  blocknumber 0x%x   cmdis %lx %lu dctrl = %x\n",num++,(direction!=CYHAL_READ)?"Write":"Read",argument,length,arg.cmd53.count,cmd,cmd,dctrl);
+    WPRINT_MACRO(("%d %s cmd 53 argument %lx datasize %d  blocknumber 0x%x   cmdis %lx %lu dctrl = %x\n",num++,(direction!=CYHAL_READ)?"Write":"Read",argument,length,arg.cmd53.count,cmd,cmd,dctrl));
   }
   return result;
 }
