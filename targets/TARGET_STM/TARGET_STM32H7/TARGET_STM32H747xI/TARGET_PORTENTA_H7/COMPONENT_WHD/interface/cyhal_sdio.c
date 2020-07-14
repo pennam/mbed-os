@@ -277,6 +277,7 @@ restart:
       if ( loop_count == 0 || (( response != NULL) && (( temp_sta & SDIO_ERROR_MASK ) != 0))  )
       {
         WPRINT_MACRO( ("Restart single access loop count %ld  stat %lx\n",loop_count,temp_sta) );
+        HAL_Delay(10U);
         goto restart;
       }
      } while ( ( temp_sta & SDIO_FLAG_CMDACT ) != 0);
