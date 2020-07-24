@@ -104,25 +104,22 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
 #ifdef USES_RESOURCE_GENERIC_FILESYSTEM
     else
     {
-        wiced_file_t file_handle;
-        uint64_t size64;
-        uint64_t maxsize64 =  maxsize;
-        if (WICED_SUCCESS !=
-            wiced_filesystem_file_open (&resource_fs_handle, &file_handle, resource->val.fs.filename,
-                                        WICED_FILESYSTEM_OPEN_FOR_READ) )
+        int file_handle = -1;
+        if (WHD_SUCCESS !=
+            wiced_filesystem_file_open (&file_handle, resource->val.fs.filename) )
         {
-            return RESOURCE_FILE_OPEN_FAIL;
+            return WHD_BADARG;
         }
-        if (WICED_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset), SEEK_SET) )
-        {
-            return RESOURCE_FILE_SEEK_FAIL;
-        }
-        if (WICED_SUCCESS != wiced_filesystem_file_read (&file_handle, buffer, maxsize64, &size64) )
+        if (WHD_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset)) )
         {
             wiced_filesystem_file_close (&file_handle);
-            return RESOURCE_FILE_READ_FAIL;
+            return WHD_BADARG;
         }
-        *size = (uint32_t)size64;
+        if (WHD_SUCCESS != wiced_filesystem_file_read (&file_handle, buffer, *size, &size) )
+        {
+            wiced_filesystem_file_close (&file_handle);
+            return WHD_BADARG;
+        }
         wiced_filesystem_file_close (&file_handle);
     }
 #else
