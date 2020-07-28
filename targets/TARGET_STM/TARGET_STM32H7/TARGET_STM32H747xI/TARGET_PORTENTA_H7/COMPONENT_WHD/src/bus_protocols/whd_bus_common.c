@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cypress Semiconductor Corporation
+ * Copyright 2020 Cypress Semiconductor Corporation
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -504,9 +504,7 @@ whd_result_t whd_bus_transfer_backplane_bytes(whd_driver_t whd_driver, whd_bus_t
         }
     }
 
-done: 
-
-    CHECK_RETURN(whd_bus_set_backplane_window(whd_driver, CHIPCOMMON_BASE_ADDRESS) );
+done: CHECK_RETURN(whd_bus_set_backplane_window(whd_driver, CHIPCOMMON_BASE_ADDRESS) );
     if (pkt_buffer != NULL)
     {
         CHECK_RETURN(whd_buffer_release(whd_driver, pkt_buffer,
