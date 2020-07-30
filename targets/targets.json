@@ -2718,6 +2718,7 @@
         "macros_add": [
             "STM32H747xx",
             "MBED_TICKLESS",
+            "MBEDTLS_FS_IO",
             "EXTRA_IDLE_STACK_REQUIRED"
         ],
         "detect_code": ["0813"],
