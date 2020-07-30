@@ -103,8 +103,15 @@ nsapi_error_t TLSSocketWrapper::set_root_ca_cert(const void *root_ca, size_t len
 
     /* Parse CA certification */
     int ret;
-    if ((ret = mbedtls_x509_crt_parse(crt, static_cast<const unsigned char *>(root_ca),
-                                      len)) != 0) {
+    switch (len) {
+#if defined(MBEDTLS_FS_IO)
+    case 0:
+        ret = mbedtls_x509_crt_parse_path(crt, static_cast<const char *>(root_ca));
+#endif
+    default:
+        ret = mbedtls_x509_crt_parse(crt, static_cast<const unsigned char *>(root_ca), len);
+    }
+    if (ret != 0) {
         print_mbedtls_error("mbedtls_x509_crt_parse", ret);
         mbedtls_x509_crt_free(crt);
         delete crt;
