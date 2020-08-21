@@ -10088,7 +10088,7 @@
     "PORTENTA_H7": {
         "core": "",
         "public": false,
-        "inherits": ["MCU_STM32"],
+        "inherits": ["FAMILY_STM32"],
         "extra_labels_add": [
             "STM32H7",
             "STM32H747xI",
