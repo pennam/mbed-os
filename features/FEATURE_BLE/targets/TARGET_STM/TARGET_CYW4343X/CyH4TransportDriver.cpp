@@ -164,6 +164,7 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
         uart.write(&to_write, 1);
         ++i;
     }
+    while (uart.writeable() == 0);
 
     deassert_bt_dev_wake();
     sleep_manager_unlock_deep_sleep();
