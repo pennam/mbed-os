@@ -2720,7 +2720,8 @@
             "MBED_TICKLESS",
             "MBEDTLS_FS_IO",
             "MBEDTLS_SHA1_C",
-            "EXTRA_IDLE_STACK_REQUIRED"
+            "EXTRA_IDLE_STACK_REQUIRED",
+            "BT_UART_NO_3M_SUPPORT"
         ],
         "detect_code": ["0813"],
         "components_add": ["QSPIF", "FLASHIAP", "WHD", "4343W", "CYW43XXX"],
