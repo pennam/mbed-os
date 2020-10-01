@@ -46,7 +46,7 @@
 #define USE_PLL_HSI          0x2  // Use HSI internal clock
 
 #if ( ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) )
-uint8_t SetSysClock_PLL_HSE(uint8_t bypass);
+uint8_t SetSysClock_PLL_HSE(uint8_t bypass, bool lowspeed);
 #endif /* ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) */
 
 #if ((CLOCK_SOURCE) & USE_PLL_HSI)
@@ -62,16 +62,22 @@ uint8_t SetSysClock_PLL_HSI(void);
   * @retval None
   */
 
-MBED_WEAK void SetSysClock(void)
+void SetSysClock(void)
 {
+
+  bool lowspeed = false;
+#if defined(LOWSPEED) && (LOWSPEED == 1)
+  lowspeed = true;
+#endif
+
 #if ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC)
     /* 1- Try to start with HSE and external clock (MCO from STLink PCB part) */
-    if (SetSysClock_PLL_HSE(1) == 0)
+    if (SetSysClock_PLL_HSE(1, lowspeed) == 0)
 #endif
     {
 #if ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL)
         /* 2- If fail try to start with HSE and external xtal */
-        if (SetSysClock_PLL_HSE(0) == 0)
+        if (SetSysClock_PLL_HSE(0, lowspeed) == 0)
 #endif
         {
 #if ((CLOCK_SOURCE) & USE_PLL_HSI)
@@ -85,20 +91,64 @@ MBED_WEAK void SetSysClock(void)
     }
 }
 
+static const uint32_t _keep;
+bool isBootloader() {
+  return ((uint32_t)&_keep < 0x8040000);
+}
+
+bool isBetaBoard() {
+  uint8_t* bootloader_data = (uint8_t*)(0x801F000);
+  if (bootloader_data[0] != 0xA0 || bootloader_data[1] < 14) {
+    return true;
+  } else {
+    return (bootloader_data[10] == 27);
+  }
+}
+
 #if ( ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) )
 /******************************************************************************/
 /*            PLL (clocked by HSE) used as System clock source                */
 /******************************************************************************/
-MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+uint8_t SetSysClock_PLL_HSE(uint8_t bypass, bool lowspeed)
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
+    // If we are reconfiguring the clock, select CSI as system clock source to allow modification of the PLL configuration 
+    if (__HAL_RCC_GET_PLL_OSCSOURCE() == RCC_PLLSOURCE_HSE) {
+      RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+      RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_CSI;
+      if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+      {
+        return 0;
+      }
+    }
+
+    /* Enable oscillator pin */
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    GPIO_InitTypeDef  gpio_osc_init_structure;
+    gpio_osc_init_structure.Pin = GPIO_PIN_1;
+    gpio_osc_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_osc_init_structure.Pull = GPIO_PULLUP;
+    gpio_osc_init_structure.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOH, &gpio_osc_init_structure);
+    HAL_Delay(10);
+    HAL_GPIO_WritePin(GPIOH, GPIO_PIN_1, 1);
+
     /* Supply configuration update enable */
-    HAL_PWREx_ConfigSupply(PWR_DIRECT_SMPS_SUPPLY);
+    if (isBetaBoard()) {
+      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_EXT);
+    } else {
+      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_LDO);
+    }
     /* Configure the main internal regulator output voltage */
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    if (lowspeed) {
+      __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+    } else {
+      __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    }
 
     while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
@@ -112,12 +162,26 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 5;   // 5 MHz
-    RCC_OscInitStruct.PLL.PLLN = 192; // 960 MHz
-    RCC_OscInitStruct.PLL.PLLP = 2;   // PLLCLK = SYSCLK = 480 MHz
-    RCC_OscInitStruct.PLL.PLLQ = 116;  // PLL1Q used for FDCAN = 10 MHz
-    RCC_OscInitStruct.PLL.PLLR = 2;
+    RCC_OscInitStruct.PLL.PLLM = 5;
+    if (lowspeed) {
+      RCC_OscInitStruct.PLL.PLLN = 40;
+    } else {
+      RCC_OscInitStruct.PLL.PLLN = 160;
+    }
+
+    if (isBetaBoard()) {
+      RCC_OscInitStruct.PLL.PLLM = 9;
+      if (lowspeed) {
+        RCC_OscInitStruct.PLL.PLLN = 80;
+      } else {
+        RCC_OscInitStruct.PLL.PLLN = 300;
+      }
+    }
+
     RCC_OscInitStruct.PLL.PLLFRACN = 0;
+    RCC_OscInitStruct.PLL.PLLP = 2;
+    RCC_OscInitStruct.PLL.PLLR = 2;
+    RCC_OscInitStruct.PLL.PLLQ = 10;
     RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
     RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
@@ -135,9 +199,15 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
     RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
     RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK) {
+    if (lowspeed) {
+      if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+        return 0; // FAIL
+    } else {
+      if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
         return 0; // FAIL
     }
+
+    // HAL_RCCEx_EnableBootCore(RCC_BOOT_C2);
 
 #if DEVICE_USBDEVICE
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
@@ -163,13 +233,18 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 /******************************************************************************/
 /*            PLL (clocked by HSI) used as System clock source                */
 /******************************************************************************/
-MBED_WEAK uint8_t SetSysClock_PLL_HSI(void)
+uint8_t SetSysClock_PLL_HSI(void)
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
     RCC_OscInitTypeDef RCC_OscInitStruct;
 
-    /*!< Supply configuration update enable */
-    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
+    /* Supply configuration update enable */
+    if (isBetaBoard()) {
+      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_EXT);
+    } else {
+      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_LDO);
+    }
+
     /* The voltage scaling allows optimizing the power consumption when the device is
     clocked below the maximum system frequency, to update the voltage scaling value
     regarding system frequency refer to product datasheet.  */
@@ -186,10 +261,11 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSI(void)
     RCC_OscInitStruct.PLL.PLLM = 8;
     RCC_OscInitStruct.PLL.PLLN = 100;
     RCC_OscInitStruct.PLL.PLLP = 2;
-    RCC_OscInitStruct.PLL.PLLQ = 2;
+    RCC_OscInitStruct.PLL.PLLQ = 10;
     RCC_OscInitStruct.PLL.PLLR = 2;
     RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
-    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
+    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         return 0; // FAIL
     }
@@ -211,3 +287,17 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSI(void)
     return 1; // OK
 }
 #endif /* ((CLOCK_SOURCE) & USE_PLL_HSI) */
+
+#if defined (CORE_CM4)
+void HSEM2_IRQHandler(void)
+{
+  HAL_HSEM_IRQHandler();
+}
+#endif
+
+#if defined (CORE_CM7)
+void HSEM1_IRQHandler(void)
+{
+  HAL_HSEM_IRQHandler();
+}
+#endif
