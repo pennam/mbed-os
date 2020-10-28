@@ -2870,6 +2870,8 @@
         "macros_add": [
             "STM32H747xx",
             "MBED_TICKLESS",
+            "MBEDTLS_FS_IO",
+            "MBEDTLS_SHA1_C",
             "EXTRA_IDLE_STACK_REQUIRED"
         ],
         "overrides": { "lpticker_delay_ticks": 4 },
