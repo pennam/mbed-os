@@ -2843,7 +2843,8 @@
         "extra_labels_add": [
             "STM32H7",
             "STM32H747xI",
-            "STM_EMAC"
+            "STM_EMAC",
+            "CORDIO"
         ],
         "config": {
             "clock_source": {
@@ -2875,7 +2876,10 @@
         "components_add": [
             "QSPIF"
         ],
-        "features": ["LWIP"],
+        "extra_labels_add": [
+            "CORDIO"
+        ],
+        "features": ["LWIP", "BLE"],
         "device_has_add": [
             "ANALOGOUT",
             "I2C",
