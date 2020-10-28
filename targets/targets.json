@@ -2913,12 +2913,14 @@
         ],
         "device_has_add": [
             "USBDEVICE",
+            "EMAC",
             "QSPI"
         ],
         "overrides": {
             "clock_source": "USE_PLL_HSE_EXTC",
             "lse_available": 1,
-            "lpticker_delay_ticks": 0
+            "lpticker_delay_ticks": 0,
+            "network-default-interface-type": "ETHERNET"
         },
         "device_name": "STM32H747XIHx"
     },
