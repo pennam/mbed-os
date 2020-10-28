@@ -2842,7 +2842,8 @@
         "inherits": ["MCU_STM32"],
         "extra_labels_add": [
             "STM32H7",
-            "STM32H747xI"
+            "STM32H747xI",
+            "STM_EMAC"
         ],
         "config": {
             "clock_source": {
@@ -2874,6 +2875,7 @@
         "components_add": [
             "QSPIF"
         ],
+        "features": ["LWIP"],
         "device_has_add": [
             "ANALOGOUT",
             "I2C",
@@ -2886,7 +2888,8 @@
         ],
         "overrides": {
             "lse_available": 0,
-            "lpticker_delay_ticks": 0
+            "lpticker_delay_ticks": 0,
+            "network-default-interface-type": "ETHERNET"
         },
         "release_versions": ["5"],
         "device_name": "STM32H747XIHx",
@@ -2904,7 +2907,8 @@
         "mbed_ram_start": "0x24000000",
         "mbed_ram_size" : "0x80000",
         "device_has_add": [
-            "MPU"
+            "MPU",
+            "EMAC"
         ]
     },
     "PORTENTA_H7_M4": {
