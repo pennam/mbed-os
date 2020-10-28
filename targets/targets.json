@@ -2844,6 +2844,7 @@
             "STM32H7",
             "STM32H747xI",
             "STM_EMAC",
+            "CYW43XXX",
             "CORDIO"
         ],
         "config": {
@@ -2874,9 +2875,13 @@
         "overrides": { "lpticker_delay_ticks": 4 },
         "detect_code": ["0813"],
         "components_add": [
-            "QSPIF"
+            "QSPIF",
+            "WHD",
+            "4343W",
+            "CYW43XXX"
         ],
         "extra_labels_add": [
+            "CYW43XXX",
             "CORDIO"
         ],
         "features": ["LWIP", "BLE"],
