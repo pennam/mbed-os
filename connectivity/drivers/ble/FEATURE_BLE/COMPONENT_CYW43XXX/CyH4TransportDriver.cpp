@@ -20,7 +20,6 @@
 #include "CyH4TransportDriver.h"
 #include "mbed_power_mgmt.h"
 #include "drivers/InterruptIn.h"
-#include "cybsp_types.h"
 #include "Callback.h"
 #include "rtos/ThisThread.h"
 #include <chrono>
@@ -32,7 +31,7 @@ namespace cypress_ble {
 using namespace std::chrono_literals;
 
 CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name, uint8_t host_wake_irq, uint8_t dev_wake_irq) :
-    cts(cts), rts(rts),
+    uart(tx, rx), cts(cts), rts(rts),
     bt_host_wake_name(bt_host_wake_name),
     bt_device_wake_name(bt_device_wake_name),
     bt_host_wake(bt_host_wake_name, PIN_INPUT, PullNone, 0),
@@ -40,20 +39,18 @@ CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, Pi
     host_wake_irq_event(host_wake_irq),
     dev_wake_irq_event(dev_wake_irq)
 {
-    cyhal_uart_init(&uart, tx, rx, NULL, NULL);
     enabled_powersave = true;
     bt_host_wake_active = false;
 }
 
 CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, int baud) :
-    cts(cts),
+    uart(tx, rx), cts(cts),
     rts(rts),
     bt_host_wake_name(NC),
     bt_device_wake_name(NC),
     bt_host_wake(bt_host_wake_name),
     bt_device_wake(bt_device_wake_name)
 {
-    cyhal_uart_init(&uart, tx, rx, NULL, NULL);
     enabled_powersave = false;
     bt_host_wake_active = false;
     sleep_manager_lock_deep_sleep();
@@ -101,16 +98,15 @@ void CyH4TransportDriver::bt_host_wake_fall_irq_handler(void)
     }
 }
 
-static void on_controller_irq(void *callback_arg, cyhal_uart_event_t event)
+void CyH4TransportDriver::on_controller_irq()
 {
-    (void)(event);
-    cyhal_uart_t *uart_obj = (cyhal_uart_t *)callback_arg;
     sleep_manager_lock_deep_sleep();
 
-    while (cyhal_uart_readable(uart_obj)) {
+    while (uart.readable()) {
         uint8_t char_received;
-        cyhal_uart_getc(uart_obj, &char_received, 0);
-        CyH4TransportDriver::on_data_received(&char_received, 1);
+        if (uart.read(&char_received, 1)) {
+            CordioHCITransportDriver::on_data_received(&char_received, 1);
+        }
     }
 
     sleep_manager_unlock_deep_sleep();
@@ -124,11 +120,22 @@ void CyH4TransportDriver::initialize()
 
     sleep_manager_lock_deep_sleep();
 
-    const cyhal_uart_cfg_t uart_cfg = { .data_bits = 8, .stop_bits = 1, .parity = CYHAL_UART_PARITY_NONE, .rx_buffer = NULL, .rx_buffer_size = 0 };
-    cyhal_uart_configure(&uart, &uart_cfg);
-    cyhal_uart_set_flow_control(&uart, cts, rts);
-    cyhal_uart_register_callback(&uart, &on_controller_irq, &uart);
-    cyhal_uart_enable_event(&uart, CYHAL_UART_IRQ_RX_NOT_EMPTY, CYHAL_ISR_PRIORITY_DEFAULT, true);
+    uart.format(
+        /* bits */ 8,
+        /* parity */ mbed::SerialBase::None,
+        /* stop bit */ 1
+    );
+
+    uart.set_flow_control(
+        /* flow */ mbed::SerialBase::RTSCTS,
+        /* rts */ rts,
+        /* cts */ cts
+    );
+
+    uart.attach(
+        mbed::callback(this, &CyH4TransportDriver::on_controller_irq),
+        mbed::SerialBase::RxIrq
+    );
 
 #if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
     if (bt_host_wake_name != NC) {
@@ -160,11 +167,11 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
 
     while (i < len + 1) {
         uint8_t to_write = i == 0 ? type : pData[i - 1];
-        while (cyhal_uart_writable(&uart) == 0);
-        cyhal_uart_putc(&uart, to_write);
+        while (uart.writeable() == 0);
+        uart.write(&to_write, 1);
         ++i;
     }
-    while(cyhal_uart_is_tx_active(&uart));
+    while (uart.writeable() == 0);
 
     deassert_bt_dev_wake();
     sleep_manager_unlock_deep_sleep();
@@ -200,8 +207,7 @@ void CyH4TransportDriver::deassert_bt_dev_wake()
 
 void CyH4TransportDriver::update_uart_baud_rate(int baud)
 {
-    uint32_t ignore;
-    cyhal_uart_set_baud(&uart, (uint32_t)baud, &ignore);
+    uart.baud((uint32_t)baud);
 }
 
 bool CyH4TransportDriver::get_enabled_powersave()
