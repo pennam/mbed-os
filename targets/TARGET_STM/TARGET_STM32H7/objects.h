@@ -23,6 +23,7 @@
 #include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_rtc.h"
 #include "stm32h7xx_ll_tim.h"
+#include "stm32h7xx_hal_qspi.h"
 #if defined(DUAL_CORE)
 #include "stm32h7xx_ll_hsem.h"
 #include "stm32h7xx_ll_rcc.h"
