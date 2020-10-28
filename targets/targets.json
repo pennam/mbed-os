@@ -2872,6 +2872,7 @@
             "MBED_TICKLESS",
             "MBEDTLS_FS_IO",
             "MBEDTLS_SHA1_C",
+            "CM4_BOOT_BY_APPLICATION",
             "EXTRA_IDLE_STACK_REQUIRED"
         ],
         "overrides": { "lpticker_delay_ticks": 4 },
