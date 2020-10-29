@@ -120,6 +120,8 @@ void CyH4TransportDriver::initialize()
 
     sleep_manager_lock_deep_sleep();
 
+    uart.baud(DEF_BT_BAUD_RATE);
+
     uart.format(
         /* bits */ 8,
         /* parity */ mbed::SerialBase::None,
