@@ -2852,6 +2852,11 @@
             "usb_speed": {
                 "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS",
                 "value": "USE_USB_OTG_HS"
+            },
+            "abp1_clock": {
+                "help": "ABP1 clock to fix I2C speed calculation",
+                "value": "112500000",
+                "macro_name": "APB1CLK"
             }
         },
         "macros_add": [
