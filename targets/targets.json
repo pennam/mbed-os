@@ -2882,6 +2882,7 @@
         "device_has_add": [
             "USBDEVICE",
             "FLASH",
+            "EMAC",
             "QSPI"
         ],
         "overrides": {
