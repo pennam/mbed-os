@@ -1,6 +1,9 @@
 /* mbed Microcontroller Library
- *******************************************************************************
- * Copyright (c) 2015, STMicroelectronics
+ * SPDX-License-Identifier: BSD-3-Clause
+ ******************************************************************************
+ *
+ * Copyright (c) 2015-2020 STMicroelectronics.
+ * Copyright (c) 2020, Arduino SA.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,41 +51,8 @@ extern "C" {
 #define I2CAPI_I2C3_CLKSRC RCC_I2C3CLKSOURCE_D2PCLK1
 #define I2CAPI_I2C4_CLKSRC RCC_I2C4CLKSOURCE_D3PCLK1
 
-#if (APB1CLK)
-#define APB1CLK_MULTIPLIER  (APB1CLK / 54000000)
-#else
-#define APB1CLK_MULTIPLIER  (1)
-#endif
-
-/*  Provide the suitable timing depending on requested frequencie */
-static inline uint32_t get_i2c_timing(int hz)
-{
-    uint32_t tim = 0;
-    /*
-       Values calculated with I2C_Timing_Configuration tool (excel file)
-       * Standard mode (up to 100 kHz)
-       * Fast Mode (up to 400 kHz)
-       * Fast Mode Plus (up to 1 MHz)
-       Below values obtained with:
-       - I2Cx clock source = APB1CLK = 54 MHz
-       - Analog filter delay = ON
-       - Digital filter coefficient = 0
-    */
-    switch (hz) {
-        case 100000:
-            tim = 0x10916998 * APB1CLK_MULTIPLIER; // Standard mode with Rise time = 120ns, Fall time = 120ns
-            break;
-        case 400000:
-            tim = 0x00B11B54 * APB1CLK_MULTIPLIER; // Fast Mode with Rise time = 120ns, Fall time = 120ns
-            break;
-        case 1000000:
-            tim = 0x0090091B * APB1CLK_MULTIPLIER; // Fast Mode Plus with Rise time = 120ns, Fall time = 10ns
-            break;
-        default:
-            break;
-    }
-    return tim;
-}
+/*  Provide the suitable timing depending on requested frequency */
+extern uint32_t get_i2c_timing(int hz);
 
 #ifdef __cplusplus
 }
