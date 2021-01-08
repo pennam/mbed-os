@@ -3037,6 +3037,7 @@
             "clock_source": "USE_PLL_HSE_EXTC",
             "lse_available": 1,
             "lpticker_delay_ticks": 0,
+            "sd_transceiver_available": false,
             "network-default-interface-type": "ETHERNET"
         },
         "device_name": "STM32H747XIHx"
