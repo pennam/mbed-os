@@ -335,6 +335,90 @@ static uint32_t I2C_ComputeTiming(uint32_t clock_src_freq, uint32_t i2c_freq)
 
   return ret;
 }
+
+/**
+  * @brief  Get I2C clock source frequency according I2C instance used.
+  * @param  i2c I2C instance name.
+  * @retval I2C clock source frequency in Hz.
+  */
+static uint32_t I2C_GetPclk(I2CName i2c)
+{
+  uint32_t clocksource;
+  uint32_t pclk;
+  PLL3_ClocksTypeDef pll3_clocks;
+
+  if(i2c == I2C_1 || i2c == I2C_2 || i2c == I2C_3) {
+    clocksource = __HAL_RCC_GET_I2C123_SOURCE();
+    printf("I2C123\r\n");
+    switch(clocksource)
+    {
+      case RCC_I2C123CLKSOURCE_D2PCLK1:
+        printf("Clk source D2PCLK1\r\n");
+        pclk = HAL_RCC_GetPCLK1Freq();
+        break;
+      case RCC_I2C123CLKSOURCE_PLL3:
+        printf("Clk source PLL3\r\n");
+        HAL_RCCEx_GetPLL3ClockFreq(&pll3_clocks);
+        pclk = pll3_clocks.PLL3_R_Frequency;
+        break;
+      case RCC_I2C123CLKSOURCE_HSI:
+        printf("Clk source HSI\r\n");
+        pclk = HSI_VALUE;
+        break;
+      case RCC_I2C123CLKSOURCE_CSI:
+        printf("Clk source CSI\r\n");
+        pclk = CSI_VALUE;
+        break;
+      default:
+        printf("Clk source INVALID\r\n");
+        pclk = 54000000;
+        break;
+    }
+  }
+  else if(i2c == I2C_4) {
+    clocksource = __HAL_RCC_GET_I2C4_SOURCE();
+    printf("I2C4\r\n");
+    switch(clocksource)
+    {
+      case RCC_I2C4CLKSOURCE_D3PCLK1:
+        printf("Clk source D3PCLK1\r\n");
+        pclk = HAL_RCCEx_GetD3PCLK1Freq();
+        break;
+      case RCC_I2C4CLKSOURCE_PLL3:
+        printf("Clk source PLL3\r\n");
+        HAL_RCCEx_GetPLL3ClockFreq(&pll3_clocks);
+        pclk = pll3_clocks.PLL3_R_Frequency;
+        break;
+      case RCC_I2C4CLKSOURCE_HSI:
+        printf("Clk source HSI\r\n");
+        pclk = HSI_VALUE;
+        break;
+      case RCC_I2C4CLKSOURCE_CSI:
+        printf("Clk source CSI\r\n");
+        pclk = CSI_VALUE;
+        break;
+      default:
+        printf("Clk source INVALID\r\n");
+        pclk = 54000000;
+        break;
+    }
+  }
+  else {
+    pclk = 54000000;
+  }
+
+  printf("pclk %ld\r\n", pclk);
+
+  LL_RCC_ClocksTypeDef rcc_clocks;
+  LL_RCC_GetSystemClocksFreq(&rcc_clocks);
+
+  printf("rcc.pclk1 %ld\r\n", rcc_clocks.PCLK1_Frequency);
+  printf("rcc.pclk2 %ld\r\n", rcc_clocks.PCLK2_Frequency);
+  printf("rcc.pclk3 %ld\r\n", rcc_clocks.PCLK3_Frequency);
+  printf("rcc.pclk4 %ld\r\n", rcc_clocks.PCLK4_Frequency);
+
+  return pclk;
+}
 /**
   * @}
   */
@@ -347,19 +431,18 @@ static uint32_t I2C_ComputeTiming(uint32_t clock_src_freq, uint32_t i2c_freq)
  * @param  hz Required I2C clock in Hz.
  * @retval I2C timing or 0 in case of error.
  */
-uint32_t get_i2c_timing(int hz)
+uint32_t get_i2c_timing(I2CName i2c, int hz)
 {
   uint32_t tim;
+  uint32_t pclk;
 
   I2c_valid_timing_nbr = 0;
 
-  /* we will use D2PCLK1 to calculate I2C timings */
-  MBED_ASSERT(RCC_I2C1CLKSOURCE_D2PCLK1 ==__HAL_RCC_GET_I2C1_SOURCE());
+  pclk = I2C_GetPclk(i2c);
 
-  LL_RCC_ClocksTypeDef rcc_clocks;
-  LL_RCC_GetSystemClocksFreq(&rcc_clocks);
+  tim = I2C_ComputeTiming(pclk, hz);
 
-  tim = I2C_ComputeTiming(rcc_clocks.PCLK1_Frequency, hz);
+  printf("tim %ld\r\n", tim);
 
   return tim;
 }
