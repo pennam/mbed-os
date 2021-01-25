@@ -20,6 +20,9 @@
 #include "CyH4TransportDriver.h"
 #include "mbed_power_mgmt.h"
 #include "drivers/InterruptIn.h"
+#if !defined(CYW43XXX_UNBUFFERED_UART)
+#include "cybsp_types.h"
+#endif
 #include "Callback.h"
 #include "rtos/ThisThread.h"
 #include <chrono>
@@ -30,9 +33,13 @@ namespace cypress_ble {
 
 using namespace std::chrono_literals;
 
-
 CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name, uint8_t host_wake_irq, uint8_t dev_wake_irq) :
-    uart(tx, rx), cts(cts), rts(rts),
+#if defined(CYW43XXX_UNBUFFERED_UART)
+    uart(tx, rx),
+#else
+    tx(tx), rx(rx),
+#endif
+    cts(cts), rts(rts),
     bt_host_wake_name(bt_host_wake_name),
     bt_device_wake_name(bt_device_wake_name),
     bt_power(bt_power_name, PIN_OUTPUT, PullNone, 0),
@@ -47,9 +54,12 @@ CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, Pi
 }
 
 CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud) :
-    uart(tx, rx), cts(cts),
-    rts(rts),
+#if defined(CYW43XXX_UNBUFFERED_UART)
+    uart(tx, rx),
+#else
     tx(tx), rx(rx),
+#endif
+    cts(cts), rts(rts),
     bt_host_wake_name(NC),
     bt_device_wake_name(NC),
     bt_power(bt_power_name, PIN_OUTPUT, PullNone, 0),
@@ -106,15 +116,31 @@ void CyH4TransportDriver::bt_host_wake_fall_irq_handler(void)
     }
 }
 
+#if defined(CYW43XXX_UNBUFFERED_UART)
 void CyH4TransportDriver::on_controller_irq()
+#else
+static void on_controller_irq(void *callback_arg, cyhal_uart_event_t event)
+#endif
 {
+#if !defined(CYW43XXX_UNBUFFERED_UART)
+    (void)(event);
+    cyhal_uart_t *uart_obj = (cyhal_uart_t *)callback_arg;
+#endif
+
     sleep_manager_lock_deep_sleep();
 
+#if defined(CYW43XXX_UNBUFFERED_UART)
     while (uart.readable()) {
         uint8_t char_received;
         if (uart.read(&char_received, 1)) {
             CordioHCITransportDriver::on_data_received(&char_received, 1);
         }
+#else
+    while (cyhal_uart_readable(uart_obj)) {
+        uint8_t char_received;
+        cyhal_uart_getc(uart_obj, &char_received, 0);
+        CyH4TransportDriver::on_data_received(&char_received, 1);
+#endif
     }
 
     sleep_manager_unlock_deep_sleep();
@@ -127,6 +153,7 @@ void CyH4TransportDriver::initialize()
     bt_power = 0;
     rtos::ThisThread::sleep_for(1ms);
 
+#if defined(CYW43XXX_UNBUFFERED_UART)
     uart.baud(DEF_BT_BAUD_RATE);
 
     uart.format(
@@ -145,6 +172,16 @@ void CyH4TransportDriver::initialize()
         mbed::callback(this, &CyH4TransportDriver::on_controller_irq),
         mbed::SerialBase::RxIrq
     );
+#else
+    cyhal_uart_init(&uart, tx, rx, NULL, NULL);
+
+    const cyhal_uart_cfg_t uart_cfg = { .data_bits = 8, .stop_bits = 1, .parity = CYHAL_UART_PARITY_NONE, .rx_buffer = NULL, .rx_buffer_size = 0 };
+    cyhal_uart_configure(&uart, &uart_cfg);
+    cyhal_uart_set_flow_control(&uart, cts, rts);
+    cyhal_uart_clear(&uart);
+    cyhal_uart_register_callback(&uart, &on_controller_irq, &uart);
+    cyhal_uart_enable_event(&uart, CYHAL_UART_IRQ_RX_NOT_EMPTY, CYHAL_ISR_PRIORITY_DEFAULT, true);
+#endif
 
     bt_power = 1;
 
@@ -168,6 +205,19 @@ void CyH4TransportDriver::initialize()
 
 void CyH4TransportDriver::terminate()
 {
+#if !defined(CYW43XXX_UNBUFFERED_UART)
+    cyhal_uart_event_t enable_irq_event = (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE
+                                       | CYHAL_UART_IRQ_TX_DONE
+                                       | CYHAL_UART_IRQ_RX_NOT_EMPTY
+                                      );
+
+    cyhal_uart_enable_event(&uart,
+                            enable_irq_event,
+                            CYHAL_ISR_PRIORITY_DEFAULT,
+                            false
+                        );
+#endif
+						
     if(bt_host_wake.is_connected())
     {
 #if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
@@ -179,7 +229,11 @@ void CyH4TransportDriver::terminate()
 
     bt_power = 0; //BT_POWER is an output, should not be freed only set inactive
 
+#if defined(CYW43XXX_UNBUFFERED_UART)
     uart.close();
+#else
+    cyhal_uart_free(&uart);
+#endif
 }
 
 uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
@@ -191,11 +245,20 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
 
     while (i < len + 1) {
         uint8_t to_write = i == 0 ? type : pData[i - 1];
+#if defined(CYW43XXX_UNBUFFERED_UART)
         while (uart.writeable() == 0);
         uart.write(&to_write, 1);
+#else
+        while (cyhal_uart_writable(&uart) == 0);
+        cyhal_uart_putc(&uart, to_write);
+#endif
         ++i;
     }
+#if defined(CYW43XXX_UNBUFFERED_UART)
     while (uart.writeable() == 0);
+#else
+    while(cyhal_uart_is_tx_active(&uart));
+#endif
 
     deassert_bt_dev_wake();
     sleep_manager_unlock_deep_sleep();
@@ -231,7 +294,12 @@ void CyH4TransportDriver::deassert_bt_dev_wake()
 
 void CyH4TransportDriver::update_uart_baud_rate(int baud)
 {
+#if defined(CYW43XXX_UNBUFFERED_UART)
     uart.baud((uint32_t)baud);
+#else
+    uint32_t ignore;
+    cyhal_uart_set_baud(&uart, (uint32_t)baud, &ignore);
+#endif	
 }
 
 bool CyH4TransportDriver::get_enabled_powersave()
