@@ -272,6 +272,8 @@ public:
      *  @return Zero if the usage was set, -1 if a transaction is on-going
      */
     int set_dma_usage_rx(DMAUsage usage);
+    
+    int is_tx_active();
 
 #if !defined(DOXYGEN_ONLY)
 protected:

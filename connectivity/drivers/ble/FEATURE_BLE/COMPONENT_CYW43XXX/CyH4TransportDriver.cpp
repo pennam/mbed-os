@@ -26,6 +26,7 @@
 #include "Callback.h"
 #include "rtos/ThisThread.h"
 #include <chrono>
+#include "hal/serial_api.h"
 
 namespace ble {
 namespace vendor {
@@ -255,7 +256,7 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
         ++i;
     }
 #if defined(CYW43XXX_UNBUFFERED_UART)
-    while (uart.writeable() == 0);
+    while(uart.is_tx_active() != 0);
 #else
     while(cyhal_uart_is_tx_active(&uart));
 #endif

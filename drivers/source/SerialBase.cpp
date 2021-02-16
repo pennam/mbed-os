@@ -486,6 +486,17 @@ void SerialBase::interrupt_handler_asynch(void)
     }
 }
 
+int SerialBase::is_tx_active(void)
+{
+    int result = 0;
+    lock();
+    result = serial_tx_active(&_serial);
+    printf("serial tx active %d",result);
+    unlock();
+
+    return result;
+}
+
 #endif
 
 } // namespace mbed

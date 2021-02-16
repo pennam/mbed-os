@@ -210,6 +210,8 @@ public:
      *  @param flow2 the second flow control pin (CTS for RTSCTS)
      */
     void set_flow_control(Flow type, PinName flow1 = NC, PinName flow2 = NC);
+    
+    int is_tx_active();
 #endif // DEVICE_SERIAL_FC
 };
 
