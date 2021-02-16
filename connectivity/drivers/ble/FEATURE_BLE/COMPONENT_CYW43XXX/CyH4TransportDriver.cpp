@@ -34,7 +34,7 @@ namespace cypress_ble {
 using namespace std::chrono_literals;
 
 CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name, uint8_t host_wake_irq, uint8_t dev_wake_irq) :
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     uart(tx, rx),
 #else
     tx(tx), rx(rx),
@@ -54,7 +54,7 @@ CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, Pi
 }
 
 CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud) :
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     uart(tx, rx),
 #else
     tx(tx), rx(rx),
@@ -116,20 +116,20 @@ void CyH4TransportDriver::bt_host_wake_fall_irq_handler(void)
     }
 }
 
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
 void CyH4TransportDriver::on_controller_irq()
 #else
 static void on_controller_irq(void *callback_arg, cyhal_uart_event_t event)
 #endif
 {
-#if !defined(CYW43XXX_UNBUFFERED_UART)
+#if !(defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     (void)(event);
     cyhal_uart_t *uart_obj = (cyhal_uart_t *)callback_arg;
 #endif
 
     sleep_manager_lock_deep_sleep();
 
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     while (uart.readable()) {
         uint8_t char_received;
         if (uart.read(&char_received, 1)) {
@@ -153,7 +153,7 @@ void CyH4TransportDriver::initialize()
     bt_power = 0;
     rtos::ThisThread::sleep_for(1ms);
 
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     uart.baud(DEF_BT_BAUD_RATE);
 
     uart.format(
@@ -205,7 +205,7 @@ void CyH4TransportDriver::initialize()
 
 void CyH4TransportDriver::terminate()
 {
-#if !defined(CYW43XXX_UNBUFFERED_UART)
+#if !(defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     cyhal_uart_event_t enable_irq_event = (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE
                                        | CYHAL_UART_IRQ_TX_DONE
                                        | CYHAL_UART_IRQ_RX_NOT_EMPTY
@@ -229,7 +229,7 @@ void CyH4TransportDriver::terminate()
 
     bt_power = 0; //BT_POWER is an output, should not be freed only set inactive
 
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     uart.close();
 #else
     cyhal_uart_free(&uart);
@@ -245,7 +245,7 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
 
     while (i < len + 1) {
         uint8_t to_write = i == 0 ? type : pData[i - 1];
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
         while (uart.writeable() == 0);
         uart.write(&to_write, 1);
 #else
@@ -254,8 +254,8 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
 #endif
         ++i;
     }
-#if defined(CYW43XXX_UNBUFFERED_UART)
-    while (uart.writeable() == 0);
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
+    while(uart.is_tx_active() != 0);
 #else
     while(cyhal_uart_is_tx_active(&uart));
 #endif
@@ -294,7 +294,7 @@ void CyH4TransportDriver::deassert_bt_dev_wake()
 
 void CyH4TransportDriver::update_uart_baud_rate(int baud)
 {
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     uart.baud((uint32_t)baud);
 #else
     uint32_t ignore;

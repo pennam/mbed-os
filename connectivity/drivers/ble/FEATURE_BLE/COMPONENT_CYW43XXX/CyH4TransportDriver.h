@@ -25,7 +25,7 @@
 #include "drivers/DigitalInOut.h"
 #include "drivers/InterruptIn.h"
 
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
 #include "drivers/UnbufferedSerial.h"
 #else
 #include "cyhal_uart.h"
@@ -86,8 +86,8 @@ public:
 private:
     void assert_bt_dev_wake();
     void deassert_bt_dev_wake();
-	
-#if defined(CYW43XXX_UNBUFFERED_UART)
+
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     void on_controller_irq();
 #endif
 
@@ -98,7 +98,7 @@ private:
     // However UART APIs does not prevent the BT radio from going to sleep.
     // Use the HAL APIs to prevent the radio from going to sleep until UART transmition is complete.
     // Mbed layer has no API that distinguish between data in HW buffer v.s. data already transmitted.
-#if defined(CYW43XXX_UNBUFFERED_UART)
+#if (defined(CYW43XXX_UNBUFFERED_UART) && DEVICE_SERIAL_ASYNCH)
     mbed::UnbufferedSerial uart;
 #else
     cyhal_uart_t uart;

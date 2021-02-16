@@ -3050,7 +3050,8 @@
         "device_has_add": [
             "USBDEVICE",
             "EMAC",
-            "QSPI"
+            "QSPI",
+            "SERIAL_ASYNCH"
         ],
         "overrides": {
             "system_power_supply": "PWR_SMPS_1V8_SUPPLIES_LDO",
