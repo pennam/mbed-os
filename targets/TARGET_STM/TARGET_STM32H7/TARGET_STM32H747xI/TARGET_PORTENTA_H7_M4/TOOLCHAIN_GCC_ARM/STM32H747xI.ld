@@ -30,11 +30,12 @@ MEMORY
 {
   RAM (xrw)                     : ORIGIN = RAM_START + 0x298, LENGTH = RAM_SIZE - 0x298
   OPENAMP_RSC_TAB (rwx)         : ORIGIN = 0x38000000, LENGTH = 1K
-  OPEN_AMP_SHMEM (rwx)          : ORIGIN = 0x38000400, LENGTH = 63K
+  OPEN_AMP_SHMEM (rwx)          : ORIGIN = 0x38000400, LENGTH = 62K
+  /*PDM_MEM (rwx)                 : ORIGIN = 0x3800FC00, LENGTH = 1K Reserved for PDM and M7 */
   FLASH (rx)                    : ORIGIN = MBED_APP_START, LENGTH = MBED_APP_SIZE
 }
  __OPENAMP_region_start__  = ORIGIN(OPEN_AMP_SHMEM);
- __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
+ __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM) - 1;
 
 /* Linker script to place sections and symbol values. Should be used together
  * with other linker script that defines memory regions FLASH and RAM.
