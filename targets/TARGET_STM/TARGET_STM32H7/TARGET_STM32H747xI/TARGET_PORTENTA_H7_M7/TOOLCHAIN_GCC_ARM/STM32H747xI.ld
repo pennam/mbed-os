@@ -33,7 +33,8 @@ MEMORY
   RAM (xrw)                     : ORIGIN = RAM_START + 0x298, LENGTH = RAM_SIZE - 0x298
   RAM_D2 (xrw)                  : ORIGIN = 0x30000000, LENGTH = 288K
   OPENAMP_RSC_TAB (rwx)         : ORIGIN = 0x38000000, LENGTH = 1K
-  OPEN_AMP_SHMEM (rwx)          : ORIGIN = 0x38000400, LENGTH = 63K
+  OPEN_AMP_SHMEM (rwx)          : ORIGIN = 0x38000400, LENGTH = 62K
+  PDM_MEM (xrw)                 : ORIGIN = 0x3800FC00, LENGTH = 1k
   FLASH (rx)                    : ORIGIN = MBED_APP_START, LENGTH = MBED_APP_SIZE
 }
  __OPENAMP_region_start__  = ORIGIN(OPEN_AMP_SHMEM);
@@ -191,6 +192,11 @@ SECTIONS
         . = ABSOLUTE(0x38000000);
         *(.resource_table)
     } >OPENAMP_RSC_TAB  AT > FLASH
+
+    .pdm_section (NOLOAD) : {
+        . = ABSOLUTE(0x3800FC00);
+        *(.pdm_buffer)
+    } > PDM_MEM
 
     /* .stack_dummy section doesn't contains any symbols. It is only
      * used for linker to calculate size of stack sections, and assign
