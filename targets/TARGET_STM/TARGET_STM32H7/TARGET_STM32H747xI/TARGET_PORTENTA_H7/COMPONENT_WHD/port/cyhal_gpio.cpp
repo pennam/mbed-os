@@ -47,10 +47,10 @@ void cyhal_gpio_enable_event(cyhal_gpio_t pin, cyhal_gpio_event_t event, uint8_t
 {
   oob_event = event;
   if (enable) {
-    if (CYHAL_GPIO_IRQ_RISE) {
+    if (event == CYHAL_GPIO_IRQ_RISE) {
       oob_irq->rise(cb);
     }
-    if (CYHAL_GPIO_IRQ_FALL) {
+    if (event == CYHAL_GPIO_IRQ_FALL) {
       oob_irq->fall(cb);
     }
   } else if (oob_irq != NULL) {
