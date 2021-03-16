@@ -137,11 +137,11 @@ static cy_rslt_t cybsp_sdio_enumerate(const cyhal_sdio_t* sdio_object)
     {
         // Send CMD0 to set it to idle state
         sdio_try_send_cmd(sdio_object, CYHAL_WRITE, CYHAL_SDIO_CMD_GO_IDLE_STATE, no_argument,
-                          &response_ignored /*ignored*/);
+                          NULL /*ignored*/);
 
         // CMD5.
         sdio_try_send_cmd(sdio_object, CYHAL_READ, CYHAL_SDIO_CMD_IO_SEND_OP_COND, no_argument,
-                          &response_ignored /*ignored*/);
+                          NULL /*ignored*/);
 
         // Send CMD3 to get RCA.
         result = sdio_try_send_cmd(sdio_object, CYHAL_READ, CYHAL_SDIO_CMD_SEND_RELATIVE_ADDR,
