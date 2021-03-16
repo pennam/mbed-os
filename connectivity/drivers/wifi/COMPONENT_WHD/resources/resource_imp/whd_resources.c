@@ -23,6 +23,9 @@
 #include "whd_resource_api.h"
 #include "whd_debug.h"
 #include "whd.h"
+#if defined (USES_RESOURCE_GENERIC_FILESYSTEM) || defined (USES_RESOURCE_FILESYSTEM)
+#include "wiced_filesystem.h"
+#endif
 
 /******************************************************
 *                      Macros
@@ -111,6 +114,7 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
     else
     {
         wiced_file_t file_handle;
+        wiced_filesystem_t resource_fs_handle;
         uint64_t size64;
         uint64_t maxsize64 =  maxsize;
         if (WICED_SUCCESS !=
