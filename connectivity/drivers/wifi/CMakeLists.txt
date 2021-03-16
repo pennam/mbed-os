@@ -5,6 +5,10 @@ add_subdirectory(TARGET_WICED EXCLUDE_FROM_ALL)
 
 add_subdirectory(esp8266-driver)
 
+if("WHD" IN_LIST MBED_TARGET_LABELS)
+    add_subdirectory(COMPONENT_WHD)
+endif
+
 target_link_libraries(mbed-wifi
     INTERFACE
         mbed-netsocket
