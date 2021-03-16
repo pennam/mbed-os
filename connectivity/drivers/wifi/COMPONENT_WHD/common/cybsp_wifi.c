@@ -28,7 +28,6 @@
 #include "cyabs_rtos.h"
 #include "whd_types.h"
 #include "cyhal.h"
-#include "cycfg.h"
 
 #if defined(__cplusplus)
 extern "C" {
