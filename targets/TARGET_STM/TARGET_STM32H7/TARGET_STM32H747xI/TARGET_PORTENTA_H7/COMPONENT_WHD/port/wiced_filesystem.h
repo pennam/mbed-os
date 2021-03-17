@@ -22,6 +22,7 @@
 #pragma once
 
 #include "whd_config.h"
+#include "BlockDevice.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,23 @@ typedef int wiced_filesystem_t;
  *
  */
 typedef int wiced_file_t;
+
+/**
+ * File-system type Handle Structure
+ */
+typedef int wiced_filesystem_handle_type_t;
+
+/**
+ * Mount the physical device
+ *
+ * This assumes that the device is ready to read/write immediately.
+ *
+ * @param[in]  device        - physical media to init
+ * @param[out] fs_handle_out - Receives the filesystem handle.
+ *
+ * @return WICED_SUCCESS on success
+ */
+wiced_result_t wiced_filesystem_mount(mbed::BlockDevice *device, wiced_filesystem_handle_type_t fs_type, wiced_filesystem_t *fs_handle_out, const char *mounted_name);
 /**
  * Open a file for reading or writing
  *
