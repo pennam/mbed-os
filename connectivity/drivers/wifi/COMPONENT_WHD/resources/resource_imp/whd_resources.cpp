@@ -71,13 +71,13 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
 *               Variable Definitions
 ******************************************************/
 
-#ifdef WLAN_MFG_FIRMWARE
-extern const resource_hnd_t wifi_mfg_firmware_image;
-extern const resource_hnd_t wifi_mfg_firmware_clm_blob;
-#else
-extern const resource_hnd_t wifi_firmware_image;
-extern const resource_hnd_t wifi_firmware_clm_blob;
-#endif
+//#ifdef WLAN_MFG_FIRMWARE
+//extern const resource_hnd_t wifi_mfg_firmware_image;
+//extern const resource_hnd_t wifi_mfg_firmware_clm_blob;
+//#else
+//extern const resource_hnd_t wifi_firmware_image;
+//extern const resource_hnd_t wifi_firmware_clm_blob;
+//#endif
 
 unsigned char r_buffer[BLOCK_BUFFER_SIZE];
 
