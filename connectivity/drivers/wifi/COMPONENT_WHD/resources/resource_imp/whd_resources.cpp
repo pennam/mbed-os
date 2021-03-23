@@ -123,7 +123,7 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
         {
             return RESOURCE_FILE_OPEN_FAIL;
         }
-        if (WICED_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset), SEEK_SET) )
+        if (WICED_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset), WICED_FILESYSTEM_SEEK_SET) )
         {
             return RESOURCE_FILE_SEEK_FAIL;
         }
@@ -146,7 +146,7 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
             return RESOURCE_FILE_OPEN_FAIL;
         }
 
-        if (0 != wicedfs_fseek(&file_hnd, (long)(offset + resource->val.fs.offset), SEEK_SET) )
+        if (0 != wicedfs_fseek(&file_hnd, (long)(offset + resource->val.fs.offset), WICED_FILESYSTEM_SEEK_SET) )
         {
             wicedfs_fclose(&file_hnd);
             return RESOURCE_FILE_SEEK_FAIL;
