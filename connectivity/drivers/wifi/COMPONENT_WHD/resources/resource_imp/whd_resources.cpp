@@ -317,8 +317,8 @@ uint32_t host_get_resource_no_of_blocks(whd_driver_t whd_drv, whd_resource_type_
 whd_resource_source_t resource_ops =
 {
     .whd_resource_size = host_platform_resource_size,
-    .whd_get_resource_block_size = host_get_resource_block_size,
+    .whd_get_resource_block = host_get_resource_block,
     .whd_get_resource_no_of_blocks = host_get_resource_no_of_blocks,
-    .whd_get_resource_block = host_get_resource_block
+    .whd_get_resource_block_size = host_get_resource_block_size
 };
 
