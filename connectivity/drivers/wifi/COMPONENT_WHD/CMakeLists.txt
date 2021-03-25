@@ -111,7 +111,7 @@ target_include_directories(mbed-cy-psoc6-whd
 
 target_sources(mbed-cy-psoc6-whd
     INTERFACE
-        resources/resource_imp/whd_resources.c
+        resources/resource_imp/whd_resources.cpp
 
         src/whd_ap.c
         src/whd_buffer_api.c
