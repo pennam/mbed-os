@@ -486,6 +486,20 @@ void SerialBase::interrupt_handler_asynch(void)
     }
 }
 
+int SerialBase:: sync()
+{
+    lock();
+
+    while (serial_tx_active(&_serial)) {
+        // See send_break()
+        wait_us(18000000 / _baud);
+    }
+
+    unlock();
+
+    return 0;
+}
+
 #endif
 
 } // namespace mbed

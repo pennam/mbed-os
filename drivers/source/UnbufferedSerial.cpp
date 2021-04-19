@@ -113,6 +113,15 @@ int UnbufferedSerial::enable_output(bool enabled)
     return 0;
 }
 
+#if DEVICE_SERIAL_ASYNCH
+
+int UnbufferedSerial::sync()
+{
+    return SerialBase::sync();
+}
+
+#endif //DEVICE_SERIAL_ASYNCH
+
 #if DEVICE_SERIAL_FC
 void UnbufferedSerial::set_flow_control(Flow type, PinName flow1, PinName flow2)
 {

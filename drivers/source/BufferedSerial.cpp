@@ -115,6 +115,10 @@ int BufferedSerial::sync()
 
     api_unlock();
 
+#if DEVICE_SERIAL_ASYNCH
+    SerialBase::sync();
+#endif
+
     return 0;
 }
 

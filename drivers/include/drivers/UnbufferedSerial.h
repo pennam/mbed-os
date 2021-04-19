@@ -193,6 +193,14 @@ public:
     using SerialBase::RxIrq;
     using SerialBase::TxIrq;
 
+#if DEVICE_SERIAL_ASYNCH
+    /** Flush any buffers associated with the file
+     *
+     *  @return         0 on success, negative error code on failure
+     */
+    int sync() override;
+#endif // DEVICE_SERIAL_ASYNCH
+
 #if DEVICE_SERIAL_FC
     // For now use the base enum - but in future we may have extra options
     // such as XON/XOFF or manual GPIO RTSCTS.

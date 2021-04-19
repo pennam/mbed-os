@@ -273,6 +273,13 @@ public:
      */
     int set_dma_usage_rx(DMAUsage usage);
 
+
+    /** Flush hw buffers associated with serial port
+     *
+     *  @return         0 on success, negative error code on failure
+     */
+    int sync(void);
+
 #if !defined(DOXYGEN_ONLY)
 protected:
     void start_read(void *buffer, int buffer_size, char buffer_width, const event_callback_t &callback, int event, unsigned char char_match);
