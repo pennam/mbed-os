@@ -3164,7 +3164,7 @@
         "components_add": [
             "QSPIF",
             "WHD",
-            "4343W",
+            "4343W_FS",
             "CYW43XXX"
         ],
         "device_has_add": [
