@@ -259,8 +259,10 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
 #if defined(CYW43XXX_UNBUFFERED_UART)
 /* Assuming a 16 byte FIFO as worst case this will ensure all bytes are sent before deasserting bt_dev_wake */
 #ifndef BT_UART_NO_3M_SUPPORT
+    printf("Wait for 50us before asserting bt_dev_wakeup()\n\r");
     wait_us(50); // 3000000 bps
 #else
+    printf("Sleep for 2ms before asserting bt_dev_wakeup()\n\r");
     rtos::ThisThread::sleep_for(2ms); // 115200 bps
 #endif
 #else
