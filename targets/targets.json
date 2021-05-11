@@ -3137,7 +3137,8 @@
         "macros_add": [
             "CM4_BOOT_BY_APPLICATION",
             "QSPI_NO_SAMPLE_SHIFT",
-            "CYW43XXX_UNBUFFERED_UART"
+            "CYW43XXX_UNBUFFERED_UART",
+            "BT_UART_NO_3M_SUPPORT"
         ],
         "detect_code": ["0813"],
         "components_add": [
