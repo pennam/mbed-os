@@ -420,8 +420,10 @@ void i2c_init_internal(i2c_t *obj, const i2c_pinmap_t *pinmap)
 #ifdef I2C_IP_VERSION_V2
     /* These variables are initialized with 0, to overcome possiblity of
     garbage assignment */
-    obj_s->current_hz = 0;
-    obj_s->handle.Init.Timing = 0;
+    if((obj_s->current_hz != 100000) && (obj_s->current_hz != 400000) && (obj_s->current_hz != 1000000)) {
+        obj_s->current_hz = 0;
+        obj_s->handle.Init.Timing = 0;
+    }
 #endif
 
     /* Determine the I2C to use */
