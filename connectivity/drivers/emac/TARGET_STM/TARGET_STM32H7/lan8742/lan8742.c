@@ -117,7 +117,7 @@ int32_t LAN8742_Init(lan8742_Object_t *pObj)
         pObj->DevAddr = LAN8742_MAX_DEV_ADDR + 1;
 
         /* Get the device address from special mode register */
-        for (addr = 0; addr <= LAN8742_MAX_DEV_ADDR; addr ++) {
+        for (addr = 1; addr <= LAN8742_MAX_DEV_ADDR; addr ++) {
             if (pObj->IO.ReadReg(addr, LAN8742_SMR, &regvalue) < 0) {
                 status = LAN8742_STATUS_READ_ERROR;
                 /* Can't read from this device address
