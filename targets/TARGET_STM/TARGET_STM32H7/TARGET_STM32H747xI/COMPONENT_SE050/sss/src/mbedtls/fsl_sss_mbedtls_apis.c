@@ -1265,6 +1265,7 @@ sss_status_t sss_mbedtls_cipher_one_go(sss_mbedtls_symmetric_t *context,
         mbedtls_ret = mbedtls_aes_setkey_enc(
             &aes_ctx, context->keyObject->contents, (unsigned int)(context->keyObject->contents_size * 8));
     } break;
+#if defined(MBEDTLS_DES_C)
     case kAlgorithm_SSS_DES_CBC:
     case kAlgorithm_SSS_DES_ECB:
     case kAlgorithm_SSS_DES3_CBC:
@@ -1277,6 +1278,7 @@ sss_status_t sss_mbedtls_cipher_one_go(sss_mbedtls_symmetric_t *context,
             mbedtls_ret = mbedtls_des_setkey_dec(&des_ctx, context->keyObject->contents);
         }
         break;
+#endif
 #endif //SSS_HAVE_TESTCOUNTERPART
     default:
         goto exit;
@@ -1356,7 +1358,7 @@ sss_status_t sss_mbedtls_cipher_one_go(sss_mbedtls_symmetric_t *context,
     case kAlgorithm_SSS_AES_CBC:
         mbedtls_aes_free(&aes_ctx);
         break;
-#if SSS_HAVE_TESTCOUNTERPART
+#if SSS_HAVE_TESTCOUNTERPART && defined(MBEDTLS_DES_C)
     case kAlgorithm_SSS_DES_CBC:
     case kAlgorithm_SSS_DES_ECB:
     case kAlgorithm_SSS_DES3_CBC:
