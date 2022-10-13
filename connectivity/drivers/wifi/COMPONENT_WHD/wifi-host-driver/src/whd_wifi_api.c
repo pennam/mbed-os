@@ -65,7 +65,7 @@
                                      JOIN_EAPOL_KEY_G1_TIMEOUT | JOIN_EAPOL_KEY_FAILURE)
 
 #define DEFAULT_JOIN_ATTEMPT_TIMEOUT     (7000)   /* Overall join attempt timeout in milliseconds. */
-#define DEFAULT_EAPOL_KEY_PACKET_TIMEOUT (2500)   /* Timeout when waiting for EAPOL key packet M1 or M3 in milliseconds.*/
+#define DEFAULT_EAPOL_KEY_PACKET_TIMEOUT (5000)   /* Timeout when waiting for EAPOL key packet M1 or M3 in milliseconds.*/
                                                   /* Some APs may be slow to provide M1 and 1000 ms is not long enough for edge of cell. */
 #ifndef DEFAULT_PM2_SLEEP_RET_TIME
 #define DEFAULT_PM2_SLEEP_RET_TIME   (200)
