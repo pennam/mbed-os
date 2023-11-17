@@ -61,7 +61,7 @@ CellularStateMachine::CellularStateMachine(CellularDevice &device, events::Event
     _start_time(rand() % (MBED_CONF_CELLULAR_RANDOM_MAX_START_DELAY)),
 #endif // MBED_CONF_CELLULAR_RANDOM_MAX_START_DELAY
     _event_timeout(-1s), _event_id(-1), _plmn(0), _command_success(false),
-    _is_retry(false), _cb_data(), _current_event(CellularDeviceReady), _status(0)
+    _is_retry(false), _cb_data(), _timeout_cb_data(), _retry_cb_data(), _current_event(CellularDeviceReady), _status(0)
 {
 
     // set initial retry values in seconds
@@ -289,8 +289,10 @@ void CellularStateMachine::retry_state_or_fail()
     if (_retry_count < _retry_array_length) {
         tr_debug("%s: retry %d/%d", get_state_string(_state), _retry_count, _retry_array_length);
         // send info to application/driver about error logic so it can implement proper error logic
+        _retry_cb_data.retry_count = _retry_count;
+        _retry_cb_data.state = _state;
         _cb_data.status_data = _current_event;
-        _cb_data.data = &_retry_count;
+        _cb_data.data = &_retry_cb_data;
         _cb_data.error = NSAPI_ERROR_OK;
         send_event_cb(CellularStateRetryEvent);
 
@@ -680,8 +682,11 @@ void CellularStateMachine::send_event_cb(cellular_connection_status_t status)
 
 void CellularStateMachine::change_timeout(const std::chrono::duration<int, std::milli> &timeout)
 {
+    _timeout_cb_data.timeout = timeout.count();
+    _timeout_cb_data.state = _state;
+
     _cb_data.status_data = _current_event;
-    _cb_data.data = &timeout;
+    _cb_data.data = &_timeout_cb_data;
     _cb_data.error = NSAPI_ERROR_OK;
     // event callback is a preferred method to communicate to CellularDevice,
     // for example calling CellularDevice::set_timeout would call back to this class
