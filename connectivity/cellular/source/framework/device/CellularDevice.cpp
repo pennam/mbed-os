@@ -180,6 +180,11 @@ void CellularDevice::stm_callback(nsapi_event_t ev, intptr_t ptr)
 
 void CellularDevice::cellular_callback(nsapi_event_t ev, intptr_t ptr, CellularContext *ctx)
 {
+    // forward to callback function if set by attach(...).
+    if (_status_cb) {
+        _status_cb(ev, ptr);
+    }
+
     if (ev >= NSAPI_EVENT_CELLULAR_STATUS_BASE && ev <= NSAPI_EVENT_CELLULAR_STATUS_END) {
         cellular_connection_status_t cell_ev = (cellular_connection_status_t)ev;
         cell_callback_data_t *ptr_data = (cell_callback_data_t *)ptr;
@@ -219,11 +224,6 @@ void CellularDevice::cellular_callback(nsapi_event_t ev, intptr_t ptr, CellularC
             curr->cellular_callback(ev, ptr);
         }
         curr = curr->_next;
-    }
-
-    // forward to callback function if set by attach(...).
-    if (_status_cb) {
-        _status_cb(ev, ptr);
     }
 }
 
