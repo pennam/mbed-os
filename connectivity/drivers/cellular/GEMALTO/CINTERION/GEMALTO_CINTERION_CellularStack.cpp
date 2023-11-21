@@ -284,7 +284,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
         _at.resp_stop();
         if (size > 0) {
             //Valid string received
-            tr_info("Read %d bytes. Valid string: %s\n", size, ipAddress);
+            tr_info("Read %d bytes. Valid string: %s", size, ipAddress);
             // _at.restore_at_timeout();
             if (!address->set_ip_address(ipAddress)) {
                 _at.unlock();
@@ -292,7 +292,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
             }
         } else {
             //Null string received
-            tr_info("Read %d bytes. Null string\n", size);
+            tr_info("Read %d bytes. Null string", size);
             return NSAPI_ERROR_NO_ADDRESS;
         }
     }
@@ -550,7 +550,7 @@ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(Cell
         size = UDP_PACKET_SIZE;
     }
 
-    tr_info("requesting %d bytes\n", size);
+    tr_debug("requesting %d bytes\n", size);
     _at.cmd_start_stop("^SISR", "=", "%d%d", socket->id, size);
 
 sisr_retry:
@@ -574,7 +574,7 @@ sisr_retry:
 
     nsapi_size_or_error_t len = _at.read_int();
     if (len == 0) {
-        tr_warn("Socket %d no data", socket->id);
+        tr_debug("Socket %d no data", socket->id);
         _at.resp_stop();
         RESTORE_URCs_AND_RETURN(NSAPI_ERROR_WOULD_BLOCK);
     }

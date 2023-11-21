@@ -122,7 +122,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularContext::do_user_authentication()
             return NSAPI_ERROR_AUTH_FAILURE;
         }
     } else {
-        tr_info("Empty pwd and username fields: no need for authentication\n");
+        tr_info("Empty pwd and username fields: no need for authentication");
     }
 
     return NSAPI_ERROR_OK;
