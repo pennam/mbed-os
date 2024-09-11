@@ -54,6 +54,10 @@ SECTIONS
         __flash_binary_start = .;
     } > FLASH
 
+    .second_stage_ota : {
+         KEEP (*(.second_stage_ota))
+     } > FLASH
+
     .boot2 : {
         __boot2_start__ = .;
         KEEP (*(.boot2))
