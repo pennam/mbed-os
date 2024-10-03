@@ -281,7 +281,7 @@ nsapi_error_t WhdSTAInterface::connect()
     _iface_shared.if_status_flags |= IF_STATUS_STA_UP;
     _iface_shared.default_if_cfg = DEFAULT_IF_STA;
     if (!_interface) {
-        nsapi_error_t err = _stack.add_ethernet_interface(_emac, true, &_interface);
+        nsapi_error_t err = _stack.add_ethernet_interface(_emac, true, &_interface, this);
         if (err != NSAPI_ERROR_OK) {
             _interface = NULL;
             return err;
