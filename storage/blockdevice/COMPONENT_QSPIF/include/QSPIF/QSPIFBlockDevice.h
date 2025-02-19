@@ -334,17 +334,17 @@ private:
     // Detect 4-byte addressing mode and enable it if supported
     int _sfdp_detect_and_enable_4byte_addressing(uint8_t *basic_param_table_ptr, int basic_param_table_size);
 
-private:
+protected:
     enum qspif_clear_protection_method_t {
         QSPIF_BP_ULBPR,    // Issue global protection unlock instruction
         QSPIF_BP_CLEAR_SR, // Clear protection bits in status register 1
     };
 
-protected:
+
     // QSPI Driver Object
     mbed::QSPI _qspi;
 
-private:
+
     // Static List of different QSPI based Flash devices csel that already exist
     // Each QSPI Flash device csel can have only 1 QSPIFBlockDevice instance
     // _devices_mutex is used to lock csel list - only one QSPIFBlockDevice instance per csel is allowed
